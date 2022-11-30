@@ -1,0 +1,185 @@
+/* create a top down shooter where you fight red triangles */
+var canvas = document.createElement('canvas');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+document.body.appendChild(canvas);
+var ctx = canvas.getContext('2d');
+var player = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  width: 20,
+  height: 20,
+  speed: 5,
+  color: '#00A',
+  draw: function() {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+  }
+};
+var enemies = [];
+var enemySpeed = 2;
+var enemyWidth = 20;
+var enemyHeight = 20;
+var enemyColor = '#A00';
+var enemySpawnRate = 100;
+var enemySpawnTimer = 0;
+var bullets = [];
+var bulletSpeed = 5;
+var bulletWidth = 5;
+var bulletHeight = 5;
+var bulletColor = '#0A0';
+var keysDown = {};
+var init = function() {
+  document.body.addEventListener('keydown', function(e) {
+    keysDown[e.keyCode] = true;
+  });
+  document.body.addEventListener('keyup', function(e) {
+    delete keysDown[e.keyCode];
+  });
+};
+var update = function() {
+  if (38 in keysDown) { // Player holding up
+    player.y -= player.speed;
+  }
+  if (40 in keysDown) { // Player holding down
+    player.y += player.speed;
+  }
+  if (37 in keysDown) { // Player holding left
+    player.x -= player.speed;
+  }
+  if (39 in keysDown) { // Player holding right
+    player.x += player.speed;
+  }
+  if (32 in keysDown) { // Player holding space
+    bullets.push({
+      x: player.x,
+      y: player.y,
+      width: bulletWidth,
+      height: bulletHeight,
+      color: bulletColor
+    });
+  }
+  enemySpawnTimer++;
+  if (enemySpawnTimer === enemySpawnRate) {
+    enemies.push({
+      x: Math.random() * canvas.width,
+      y: -enemyHeight,
+      width: enemyWidth,
+      height: enemyHeight,
+      color: enemyColor
+    });
+    enemySpawnTimer = 0;
+  }
+  for (var i = 0; i < enemies.length; i++) {
+    enemies[i].y += enemySpeed;
+  }
+  for (var i = 0; i < bullets.length; i++) {
+    bullets[i].y -= bulletSpeed;
+  }
+};
+var render = function() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  player.draw();
+  for (var i = 0; i < enemies.length; i++) {
+    ctx.fillStyle = enemies[i].color;
+    ctx.fillRect(enemies[i].x - enemies[i].width / 2, enemies[i].y - enemies[i].height / 2, enemies[i].width, enemies[i].height);
+  }
+  for (var i = 0; i < bullets.length; i++) {
+    ctx.fillStyle = bullets[i].color;
+    ctx.fillRect(bullets[i].x - bullets[i].width / 2, bullets[i].y - bullets[i].height / 2, bullets[i].width, bullets[i].height);
+  }
+};
+var main = function() {
+  update();
+  render();
+  requestAnimationFrame(main);
+};
+init();
+main();
+/* make the player die when they touch an enemy */
+var update = function() {
+  if (38 in keysDown) { // Player holding up
+    player.y -= player.speed;
+  }
+  if (40 in keysDown) { // Player holding down
+    player.y += player.speed;
+  }
+  if (37 in keysDown) { // Player holding left
+    player.x -= player.speed;
+  }
+  if (39 in keysDown) { // Player holding right
+    player.x += player.speed;
+  }
+  if (32 in keysDown) { // Player holding space
+    bullets.push({
+      x: player.x,
+      y: player.y,
+      width: bulletWidth,
+      height: bulletHeight,
+      color: bulletColor
+    });
+  }
+  enemySpawnTimer++;
+  if (enemySpawnTimer === enemySpawnRate) {
+    enemies.push({
+      x: Math.random() * canvas.width,
+      y: -enemyHeight,
+      width: enemyWidth,
+      height: enemyHeight,
+      color: enemyColor
+    });
+    enemySpawnTimer = 0;
+  }
+  for (var i = 0; i < enemies.length; i++) {
+    enemies[i].y += enemySpeed;
+  }
+  for (var i = 0; i < bullets.length; i++) {
+    bullets[i].y -= bulletSpeed;
+  }
+  for (var i = 0; i < enemies.length; i++) {
+    for (var j = 0; j < bullets.length; j++) {
+      if (
+        bullets[j].x <= (enemies[i].x + enemies[i].width)
+        && enemies[i].x <= (bullets[j].x + bullets[j].width)
+        && bullets[j].y <= (enemies[i].y + enemies[i].height)
+        && enemies[i].y <= (bullets[j].y + bullets[j].height)
+      ) {
+        enemies.splice(i, 1);
+        bullets.splice(j, 1);
+        break;
+      }
+    }
+  }
+  for (var i = 0; i < enemies.length; i++) {
+    if (
+      player.x <= (enemies[i].x + enemies[i].width)
+      && enemies[i].x <= (player.x + player.width)
+      && player.y <= (enemies[i].y + enemies[i].height)
+      && enemies[i].y <= (player.y + player.height)
+    ) {
+      enemies.splice(i, 1);
+      player.x = canvas.width / 2;
+      player.y = canvas.height / 2;
+      break;
+    }
+  }
+};
+/* display text at the top center that says "Space attack" */
+var render = function() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#FFF';
+  ctx.font = 'bold 30px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Space Attack', canvas.width / 2, 30);
+  player.draw();
+  for (var i = 0; i < enemies.length; i++) {
+    ctx.fillStyle = enemies[i].color;
+    ctx.fillRect(enemies[i].x - enemies[i].width / 2, enemies[i].y - enemies[i].height / 2, enemies[i].width, enemies[i].height);
+  }
+  for (var i = 0; i < bullets.length; i++) {
+    ctx.fillStyle = bullets[i].color;
+    ctx.fillRect(bullets[i].x - bullets[i].width / 2, bullets[i].y - bullets[i].height / 2, bullets[i].width, bullets[i].height);
+  }
+};
