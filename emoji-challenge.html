@@ -1,0 +1,18 @@
+/* display 5 random emojis and when you click a button it changes them to random new emojis */
+var emoji = document.createElement('div');
+emoji.innerHTML = '🤔🤔🤔🤔🤔';
+document.body.appendChild(emoji);
+var button = document.createElement('button');
+button.innerHTML = 'Change Emojis';
+document.body.appendChild(button);
+button.addEventListener('click', function() {
+  emoji.innerHTML = '🤔🤔🤔🤔🤔';
+  emoji.innerHTML = emoji.innerHTML.replace(/🤔/g, function() {
+    return String.fromCodePoint(Math.floor(Math.random() * (0x1f600 - 0x1f300 + 1)) + 0x1f300);
+  });
+});
+/* change the fontsize of all text to 100 */
+var allText = document.getElementsByTagName('*');
+for (var i = 0; i < allText.length; i++) {
+  allText[i].style.fontSize = '100px';
+}
